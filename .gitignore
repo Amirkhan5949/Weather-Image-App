@@ -13,3 +13,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+# Ignore all of .idea except certain files
+.idea/*
+!.idea/codeStyles
+!.idea/.gitignore
