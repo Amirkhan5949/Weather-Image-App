@@ -37,6 +37,10 @@ android {
         jvmTarget = "11"
     }
 
+    buildFeatures {
+        viewBinding = true
+    }
+
 }
 
 dependencies {
@@ -50,7 +54,6 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-
 
     //dagger_hilt
     implementation(libs.dagger.hilt)
@@ -71,4 +74,7 @@ dependencies {
     //retrofit
     implementation(libs.retrofit)
     implementation(libs.gson)
+
+    //picasso
+    implementation(libs.picasso)
 }
