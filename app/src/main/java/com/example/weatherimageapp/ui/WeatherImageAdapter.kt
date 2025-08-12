@@ -3,11 +3,11 @@ package com.example.weatherimageapp.ui
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.weatherimageapp.assets.City
+import com.example.weatherimageapp.data.CityWeatherWithImage
 import com.example.weatherimageapp.databinding.WeatherImageItemBinding
 import com.squareup.picasso.Picasso
 
-class WeatherImageAdapter constructor(var item: List<City>) :
+class WeatherImageAdapter constructor(var item: List<CityWeatherWithImage?>) :
     RecyclerView.Adapter<WeatherImageAdapter.WeatherImageViewHolder>() {
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -32,12 +32,11 @@ class WeatherImageAdapter constructor(var item: List<City>) :
         fun bindData(position: Int) {
             with(binding) {
                 val data = item[position]
-                cityName.text = data.name
-                temp.text = data.temperature
-
+                cityName.text = data?.name
+                temp.text = data?.temperature.toString()
 
                 Picasso.get()
-                    .load(data.imageUrl)
+                    .load(data?.imageUrl)
                     .noFade() // Picasso ka default fade remove
                     .into(cityImage, object : com.squareup.picasso.Callback {
                         override fun onSuccess() {
@@ -66,5 +65,10 @@ class WeatherImageAdapter constructor(var item: List<City>) :
 
             }
         }
+    }
+
+    fun updateList(newItems: List<CityWeatherWithImage?>) {
+        this.item = newItems
+        notifyDataSetChanged()
     }
 }
