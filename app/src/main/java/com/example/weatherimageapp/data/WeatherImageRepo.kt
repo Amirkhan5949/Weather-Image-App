@@ -18,7 +18,7 @@ class WeatherImageRepo @Inject constructor(
         if (!weatherRes.isSuccessful) return null
         val weather = weatherRes.body() ?: return null
 
-        val unSplashRes = unSplashApi.getUnSplashApi(client_id = unSplashKey)
+        val unSplashRes = unSplashApi.getUnSplashApi(city,client_id = unSplashKey)
         if (!unSplashRes.isSuccessful) return null
         val photo = unSplashRes.body() ?: return null
 
@@ -27,7 +27,7 @@ class WeatherImageRepo @Inject constructor(
             temperature = weather.main.temp,
             latitude = weather.coord.lat,
             longitude = weather.coord.lon,
-            imageUrl = photo.results.get(0).urls.small
+            imageUrl = photo.results.get(0).urls.regular
         )
     }
 }
