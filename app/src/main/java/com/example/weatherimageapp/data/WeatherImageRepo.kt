@@ -2,32 +2,48 @@ package com.example.weatherimageapp.data
 
 import com.example.weatherimageapp.data.unsplash.remote.UnSplashApi
 import com.example.weatherimageapp.data.weather.remote.WeatherApi
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import retrofit2.Response
 import javax.inject.Inject
 
 class WeatherImageRepo @Inject constructor(
     private val weatherApi: WeatherApi,
     private val unSplashApi: UnSplashApi,
 ) {
-    suspend fun getCityWeatherWithImage(
+    fun getCityWeatherWithImage(
         city: String,
         weatherKey: String,
-        unSplashKey: String,
-    ): CityWeatherWithImage? {
-        val weatherRes = weatherApi.getWeatherByCity(city,weatherKey)
+        unSplashKey: String
+    ): Flow<Response<CityWeatherWithImage>> = flow {
+        coroutineScope {
+            val weatherDeferred = async { weatherApi.getWeatherByCity(city, weatherKey) }
+            val photoDeferred = async { unSplashApi.getUnSplashApi(city, client_id = unSplashKey) }
 
-        if (!weatherRes.isSuccessful) return null
-        val weather = weatherRes.body() ?: return null
+            val weatherRes = weatherDeferred.await()
+            val photoRes = photoDeferred.await()
 
-        val unSplashRes = unSplashApi.getUnSplashApi(city,client_id = unSplashKey)
-        if (!unSplashRes.isSuccessful) return null
-        val photo = unSplashRes.body() ?: return null
+            if (!weatherRes.isSuccessful) throw Exception("Weather API failed with code ${weatherRes.code()}")
+            if (!photoRes.isSuccessful) throw Exception("Photo API failed with code ${photoRes.code()}")
 
-        return CityWeatherWithImage(
-            name = weather.name,
-            temperature = weather.main.temp,
-            latitude = weather.coord.lat,
-            longitude = weather.coord.lon,
-            imageUrl = photo.results.get(0).urls.regular
-        )
+            val weather = weatherRes.body() ?: throw Exception("Weather body is null")
+            val photo = photoRes.body() ?: throw Exception("Photo body is null")
+
+            emit(
+                Response.success(
+                    CityWeatherWithImage(
+                        name = weather.name,
+                        temperature = weather.main.temp,
+                        latitude = weather.coord.lat,
+                        longitude = weather.coord.lon,
+                        imageUrl = photo.results[0].urls.regular
+                    )
+                )
+            )
+        }
     }
 }
+
+

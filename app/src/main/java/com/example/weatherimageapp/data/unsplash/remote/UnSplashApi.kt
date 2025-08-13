@@ -1,5 +1,6 @@
 package com.example.weatherimageapp.data.unsplash.remote
 
+import kotlinx.coroutines.flow.Flow
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query

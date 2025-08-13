@@ -2,6 +2,8 @@ package com.example.weatherimageapp.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.githublink.core.state.Result
+import com.example.githublink.core.state.asResult
 import com.example.weatherimageapp.core.state.ApiState
 import com.example.weatherimageapp.core.state.Constaint
 import com.example.weatherimageapp.data.CityWeatherWithImage
@@ -18,14 +20,22 @@ class WeatherImageViewModel @Inject constructor(val repo: WeatherImageRepo) : Vi
     private val _apiState = MutableStateFlow<ApiState>(ApiState.Loading)
     val apiState : StateFlow<ApiState> = _apiState.asStateFlow()
 
-    val weatherImageData = MutableStateFlow<CityWeatherWithImage?>(CityWeatherWithImage())
+    var weatherImageData = CityWeatherWithImage()
 
-     fun loadCityData(city: String/*, weatherKey: String, unsplashKey: String*/){
+     fun loadCityData(city: String){
         viewModelScope.launch {
-            val result = repo.getCityWeatherWithImage(city = city, Constaint.API_KEY_WEATHER,
-                Constaint.API_KEY_UNSPLASH)
-            weatherImageData.value = result
-            _apiState.value = ApiState.Success
+            repo.getCityWeatherWithImage(city = city, Constaint.API_KEY_WEATHER,
+                Constaint.API_KEY_UNSPLASH).asResult().collect{result ->
+                    when(result) {
+                        Result.Loading -> _apiState.value = ApiState.Loading
+                        is Result.Error -> _apiState.value = ApiState.Error(result.exception?.message.orEmpty())
+                        is Result.Success<*> -> {
+                            weatherImageData = result.data as CityWeatherWithImage
+                            _apiState.value = ApiState.Success
+                        }
+                    }
+            }
+
         }
     }
 }
