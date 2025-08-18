@@ -54,6 +54,17 @@ jobs:
       - name: Build Debug APK
         run: ./gradlew assembleDebug
 
+      # Run Detekt
+      - name: Run Detekt
+        run: ./gradlew detektAll
+
+      # Upload Detekt Report
+      - name: Upload Detekt Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: detekt-report
+          path: app/build/reports/detekt/detekt.html
+
       # Upload APK artifact
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
