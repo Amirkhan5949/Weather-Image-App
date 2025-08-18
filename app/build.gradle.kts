@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.ksp)
     alias(libs.plugins.dagger.hilt)
     kotlin("kapt")
+    id("io.gitlab.arturbosch.detekt")
 }
 
 android {
