@@ -10,5 +10,5 @@ interface UnSplashApi {
         @Query("query") query: String,
         @Query("client_id") clientId: String,
         @Query("orientation") orientation: String = "portrait"
-    ): Response<UnSplashApiResponse>
+    ):Response<UnSplashApiResponse>
 }

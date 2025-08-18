@@ -39,8 +39,7 @@ fun ImageView.loadImageWithZoom(url: String, placeholderRes: Int) {
                 override fun onError(e: Exception?) {
                     e?.printStackTrace()
                 }
-            }
-        )
+            })
 }
 
 fun <T> Fragment.collectLatestLifecycleFlow(
