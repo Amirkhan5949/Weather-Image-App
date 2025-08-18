@@ -1,5 +1,6 @@
 package com.example.weatherimageapp.data
 
+import com.example.weatherimageapp.core.exception.WeatherImageException
 import com.example.weatherimageapp.data.unsplash.remote.UnSplashApi
 import com.example.weatherimageapp.data.weather.remote.WeatherApi
 import kotlinx.coroutines.async
@@ -20,16 +21,16 @@ class WeatherImageRepo @Inject constructor(
     ): Flow<Response<CityWeatherWithImage>> = flow {
         coroutineScope {
             val weatherDeferred = async { weatherApi.getWeatherByCity(city, weatherKey) }
-            val photoDeferred = async { unSplashApi.getUnSplashApi(city, client_id = unSplashKey) }
+            val photoDeferred = async { unSplashApi.getUnSplashApi(city, clientId = unSplashKey) }
 
             val weatherRes = weatherDeferred.await()
             val photoRes = photoDeferred.await()
 
-            if (!weatherRes.isSuccessful) throw Exception("Weather API failed with code ${weatherRes.code()}")
-            if (!photoRes.isSuccessful) throw Exception("Photo API failed with code ${photoRes.code()}")
+            if (!weatherRes.isSuccessful) throw WeatherImageException("Weather API failed with code ${weatherRes.code()}")
+            if (!photoRes.isSuccessful) throw WeatherImageException("Photo API failed with code ${photoRes.code()}")
 
-            val weather = weatherRes.body() ?: throw Exception("Weather body is null")
-            val photo = photoRes.body() ?: throw Exception("Photo body is null")
+            val weather = weatherRes.body() ?: throw WeatherImageException("Weather body is null")
+            val photo = photoRes.body() ?: throw WeatherImageException("Photo body is null")
 
             emit(
                 Response.success(

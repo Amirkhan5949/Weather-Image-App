@@ -1,4 +1,4 @@
-package com.example.githublink.core.state
+package com.example.weatherimageapp.core.state
 
 import com.example.weatherimageapp.core.exception.WeatherImageException
 import kotlinx.coroutines.flow.Flow

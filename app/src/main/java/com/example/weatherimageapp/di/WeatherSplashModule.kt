@@ -19,7 +19,7 @@ class WeatherSplashModule {
     @Provides
     @Singleton
     @Named("Weather_Base_Url")
-    fun provideWeatherBaseUrl() : String = Constaint.BASE_URL_WEATHER
+    fun provideWeatherBaseUrl(): String = Constaint.BASE_URL_WEATHER
 
     @Provides
     @Singleton
@@ -47,5 +47,4 @@ class WeatherSplashModule {
     @Provides
     fun providesNetworkCallUnSplash(@Named("Retrofit_UnSplash") retrofit: Retrofit): UnSplashApi =
         retrofit.create(UnSplashApi::class.java)
-
 }

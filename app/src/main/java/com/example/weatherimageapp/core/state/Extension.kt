@@ -13,22 +13,33 @@ import kotlinx.coroutines.launch
 val String.Companion.EMPTY: String get() = ""
 
 fun ImageView.loadImageWithZoom(url: String, placeholderRes: Int) {
-    Picasso.get().load(url).placeholder(placeholderRes).noFade()
-        .into(this, object : com.squareup.picasso.Callback {
-            override fun onSuccess() {
-                scaleX = 1.2f
-                scaleY = 1.2f
-                translationY = 50f
-                alpha = 0f
+    Picasso.get()
+        .load(url)
+        .placeholder(placeholderRes)
+        .noFade()
+        .into(
+            this,
+            object : com.squareup.picasso.Callback {
+                override fun onSuccess() {
+                    scaleX = 1.2f
+                    scaleY = 1.2f
+                    translationY = 50f
+                    alpha = 0f
 
-                animate().alpha(1f).translationY(0f).scaleX(1f).scaleY(1f).setDuration(1200)
-                    .setInterpolator(android.view.animation.DecelerateInterpolator()).start()
-            }
+                    animate()
+                        .alpha(1f)
+                        .translationY(0f)
+                        .scaleX(1f)
+                        .scaleY(1f)
+                        .setDuration(1200)
+                        .setInterpolator(android.view.animation.DecelerateInterpolator())
+                        .start()
+                }
 
-            override fun onError(e: Exception?) {
-                e?.printStackTrace()
-            }
-        })
+                override fun onError(e: Exception?) {
+                    e?.printStackTrace()
+                }
+            })
 }
 
 fun <T> Fragment.collectLatestLifecycleFlow(
