@@ -2,7 +2,6 @@ package com.example.weatherimageapp.ui
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.example.weatherimageapp.data.CityWeatherWithImage
 import com.example.weatherimageapp.databinding.WetherImageActivityBinding
 import dagger.hilt.android.AndroidEntryPoint
 
