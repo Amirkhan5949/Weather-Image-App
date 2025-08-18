@@ -96,4 +96,7 @@ dependencies {
 
     //picasso
     implementation(libs.picasso)
+
+    //detekt formatting rule
+    detektPlugins(libs.detekt.formatting)
 }
