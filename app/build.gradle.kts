@@ -1,11 +1,27 @@
+import io.gitlab.arturbosch.detekt.Detekt
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.ksp)
     alias(libs.plugins.dagger.hilt)
     kotlin("kapt")
+    id("io.gitlab.arturbosch.detekt")
 }
 
+detekt {
+    toolVersion = "1.23.8"
+
+    val configFile = files("$rootDir/config/detekt/detekt.yml")
+    config.setFrom(configFile)
+
+    ignoreFailures = false
+
+}
+
+tasks.withType<Detekt>().configureEach {
+    jvmTarget = "17"
+}
 android {
     namespace = "com.example.weatherimageapp"
     compileSdk = 36
