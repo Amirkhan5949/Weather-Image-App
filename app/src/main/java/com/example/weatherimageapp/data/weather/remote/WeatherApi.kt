@@ -10,5 +10,5 @@ interface WeatherApi {
         @Query("q") city: String,
         @Query("appid") apikey: String,
         @Query("units") unis: String = "metric"
-    ):Response<WeatherResponse>
+    ): Response<WeatherResponse>
 }
