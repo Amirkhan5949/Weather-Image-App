@@ -9,6 +9,6 @@ interface WeatherApi {
     suspend fun getWeatherByCity(
         @Query("q") city: String,
         @Query("appid") apikey: String,
-        @Query("units") unis: String = "metric"
-    ):Response<WeatherResponse>
+        @Query("units") units: String = "metric"
+    ): Response<WeatherResponse>
 }
