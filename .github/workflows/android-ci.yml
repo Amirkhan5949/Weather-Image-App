@@ -56,7 +56,7 @@ jobs:
 
       # Run Detekt
       - name: Run Detekt
-        run: ./gradlew detektAll
+        run: ./gradlew detekt
 
       # Upload Detekt Report
       - name: Upload Detekt Report
@@ -64,6 +64,7 @@ jobs:
         with:
           name: detekt-report
           path: app/build/reports/detekt/detekt.html
+
 
       # Upload APK artifact
       - name: Upload Debug APK
