@@ -29,8 +29,8 @@ class WeatherImageViewModel @Inject constructor(val repo: WeatherImageRepo) : Vi
                     when(result) {
                         Result.Loading -> _apiState.value = ApiState.Loading
                         is Result.Error -> _apiState.value = ApiState.Error(result.exception?.message.orEmpty())
-                        is Result.Success<CityWeatherWithImage> -> {
-                            weatherImageData = result.data
+                        is Result.Success<*> -> {
+                            weatherImageData = result.data as CityWeatherWithImage
                             _apiState.value = ApiState.Success
                         }
                     }
