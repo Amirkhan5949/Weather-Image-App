@@ -14,9 +14,6 @@ jobs:
   checks:
     name: Build & Static Checks
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-      contents: read
 
     steps:
       # Checkout repo
