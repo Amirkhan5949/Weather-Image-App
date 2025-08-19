@@ -1,62 +1,54 @@
 import systems.danger.kotlin.*
-import java.io.File
+//import java.io.File
 
 danger(args) {
+    val createdFiles = git.createdFiles
+    val modifiedFiled = git.modifiedFiles
+    val allSourceFiles = modifiedFiled + createdFiles
+    val bigPRThreshold = 1200
+    val prTitleRegex = Regex("^((#\\d+)(,\\s+)*)+:\\s+.*\$")
 
-    // ✅ Basic PR Info
-    val pr = github.pullRequest
-    message("🚀 Running checks for PR: #${pr.number} - ${pr.title}")
+    onGitHub {
+        val prAdditionCount = pullRequest.additions ?: 0
+        val prDeletionCount = pullRequest.deletions ?: 0
 
-    // 👀 Check for description
-    if (pr.body.isNullOrBlank()) {
-        warn("⚠️ Please add a PR description for better context.")
+        //check ReleaseNotes.md
+        if (!allSourceFiles.contains("ReleaseNotes.md")) {
+            fail("No ReleaseNotes.md found in this PR. Please ensure that you add release notes in ReleaseNotes.md file.")
+        }
+
+        //check jiraId in PR title
+        if (!prTitleRegex.matches(pullRequest.title)) {
+            fail("No Github issue Id found in PR Title. Please ensure that the PR title conforms to the format: `<Github_issue_Id>: <Title>`.")
+        }
+
+        //check changes should be less than the threshold
+        if (prAdditionCount + prDeletionCount > bigPRThreshold) {
+            warn("Pull request contains heavy changes. Please ensure that your PR is small for faster review.")
+        }
+
+        //check assignee
+        if (pullRequest.assignees.isNullOrEmpty()) {
+            message("Let's also assign this pull request to someone for review.")
+        }
+
+        //check description/body
+        if (pullRequest.body.isNullOrEmpty()) {
+            warn("Having a proper description on PR gives more clarity to the reviewer. Please ensure that the PR has a neatly written description explaining the purpose of this change request.")
+        }
+
+        // check non linear commit history
+        val hasNonLinearHistory = commits.any { it.commit.parents?.size ?: 0 > 1 }
+        if (hasNonLinearHistory) {
+            warn("Pull request contains non linear commit history. Please ensure that the PR does not have any merge commit. Prefer rebase over merge.")
+        }
     }
 
-    // ✅ Parse Lint Report
-    val lintReport = File("app/build/reports/lint-results-debug.xml")
-    if (lintReport.exists()) {
-        val lintContent = lintReport.readText()
-        val issues = Regex("<issue").findAll(lintContent).count()
-
-        if (issues > 0) {
-            warn("⚠️ Android Lint found **$issues issues**. Please review the Lint report.")
-            markdown("👉 [View Lint Report](app/build/reports/lint-results-debug.html)")
+    onGit {
+        createdFiles.filter {
+            it.endsWith(".java")
+        }.forEach {
+            warn("Still living in legacy! Please consider developing any new feature in Kotlin.", it, 1)
         }
-    } else {
-        message("✅ No Lint report found (skipped).")
-    }
-
-    // ✅ Parse Detekt Report
-    val detektReport = File("app/build/reports/detekt/detekt.xml")
-    if (detektReport.exists()) {
-        val detektContent = detektReport.readText()
-        val issues = Regex("<error").findAll(detektContent).count()
-
-        if (issues > 0) {
-            fail("❌ Detekt found **$issues issues**. Please fix before merge.")
-            markdown("👉 [View Detekt Report](app/build/reports/detekt/detekt.html)")
-        }
-    } else {
-        message("✅ No Detekt report found (skipped).")
-    }
-
-    // ✅ Unit test reminder
-    val testReportDir = File("app/build/test-results/testDebugUnitTest")
-    if (testReportDir.exists()) {
-        val reports = testReportDir.listFiles { _, name ->
-            name.startsWith("TEST-") && name.endsWith(".xml")
-        }
-        if (reports.isNullOrEmpty()) {
-            warn("⚠️ Unit test results not found. Did tests run?")
-        }
-    } else {
-        warn("⚠️ Unit test directory not found.")
-    }
-
-    // ✅ Small safety rule: PR size
-    val additions = pr.additions ?: 0
-    val deletions = pr.deletions ?: 0
-    if (additions + deletions > 500) {
-        warn("⚠️ PR is quite large (${additions + deletions} changes). Consider splitting it.")
     }
 }
