@@ -4,11 +4,15 @@ on:
   push:
     branches: [ "master" ]
   pull_request:
-    branches: [ "master" ]
+    types: [ opened, synchronize, reopened ]
+    branches:
+      - "release/*"
+      - "develop"
+      - "master"
 
 jobs:
-  build:
-    name: Build & Test
+  checks:
+    name: Build & Static Checks
     runs-on: ubuntu-latest
 
     steps:
@@ -25,13 +29,13 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      # Gradle Cache
+      # Cache Gradle
       - name: Gradle Cache
         uses: ./.github/actions/gradle-cache
         with:
-          key-prefix: gradle-build
+          key-prefix: gradle-checks
 
-      # Grant permission for gradlew
+      # Permission for gradlew
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
@@ -39,40 +43,46 @@ jobs:
       - name: Run Android Lint
         run: ./gradlew lintDebug
 
-      # Upload Lint Report
+      # Run Unit Tests
+      - name: Run Unit Tests
+        run: ./gradlew testDebugUnitTest
+
+      # Run Detekt
+      - name: Run Detekt
+        run: ./gradlew detekt
+
+      # Upload Reports (backup artifacts)
       - name: Upload Lint Report
         uses: actions/upload-artifact@v4
         with:
           name: lint-report
           path: app/build/reports/lint-results-debug.html
 
-      # Run unit tests
-      - name: Run Unit Tests
-        run: ./gradlew testDebugUnitTest
-
-      # Build Debug APK
-      - name: Build Debug APK
-        run: ./gradlew assembleDebug
-
-      # Run Detekt
-      - name: Run Detekt
-        run: ./gradlew detekt
-
-      # Upload Detekt Report
       - name: Upload Detekt Report
         uses: actions/upload-artifact@v4
         with:
           name: detekt-report
           path: app/build/reports/detekt/detekt.html
 
+  danger:
+    name: "PR Sanity Check"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && contains(github.head_ref,'renovate') == false
+    needs: checks
 
-      # Upload APK artifact
-      - name: Upload Debug APK
-        uses: actions/upload-artifact@v4
+    steps:
+      - uses: actions/checkout@v4
+
+      # Run Danger Kotlin (main)
+      - name: Run Danger
+        uses: danger/kotlin@1.2.0
         with:
-          name: debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          args: --failOnErrors --no-publish-check
+        env:
+          GITHUB_TOKEN: ${{ secrets.ANDROID_PAT }}
 
-      # warning details
-      - name: Run build with warnings
-        run: ./gradlew assembleDebug --warning-mode all
+      # 👇 Add custom Danger rules
+      - name: Run Custom Danger Rules
+        run: ./gradlew dangerKotlin
+        env:
+          GITHUB_TOKEN: ${{ secrets.ANDROID_PAT }}
