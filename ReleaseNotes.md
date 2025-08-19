@@ -1,0 +1,1 @@
+#142: GIF bug fix
