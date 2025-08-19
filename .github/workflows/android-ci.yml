@@ -75,7 +75,7 @@ jobs:
 
       # Run Danger Kotlin (main)
       - name: Run Danger
-        uses: danger/kotlin@1.2.0
+        uses: danger/kotlin@1.3.3
         with:
           args: --failOnErrors --no-publish-check
         env:
