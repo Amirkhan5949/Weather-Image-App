@@ -1,4 +1,5 @@
 import systems.danger.kotlin.*
+import java.io.File
 
 danger(args) {
 
@@ -40,9 +41,16 @@ danger(args) {
     }
 
     // ✅ Unit test reminder
-    val testReport = File("app/build/test-results/testDebugUnitTest/TEST-*.xml")
-    if (!testReport.exists()) {
-        warn("⚠️ Unit test results not found. Did tests run?")
+    val testReportDir = File("app/build/test-results/testDebugUnitTest")
+    if (testReportDir.exists()) {
+        val reports = testReportDir.listFiles { _, name ->
+            name.startsWith("TEST-") && name.endsWith(".xml")
+        }
+        if (reports.isNullOrEmpty()) {
+            warn("⚠️ Unit test results not found. Did tests run?")
+        }
+    } else {
+        warn("⚠️ Unit test directory not found.")
     }
 
     // ✅ Small safety rule: PR size
